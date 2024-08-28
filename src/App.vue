@@ -8,8 +8,9 @@ const info = ref('domain')
 const results = ref({
   domain_name: ''
 })
-
+const hasError = ref(false)
 function submit() {
+  hasError.value = false;
   axios.get('http://127.0.0.1:8000/api/home', {
     params: {
       domain_name: domain.value
@@ -17,7 +18,10 @@ function submit() {
   }).then((response) => {
     results.value = response.data;
 
-  });
+  }).catch(() => { 
+    hasError.value = true;
+    console.log('error', hasError.value)
+  })
 }
 
 const truncateString = (string = '', maxLength = 50) => 
@@ -34,9 +38,13 @@ const truncateString = (string = '', maxLength = 50) =>
     </header>
     <main>
       <div>
-        <div class="input-group mb-3">
-          <input type="text" class="form-control" placeholder="Enter domain name" aria-label="Domain Name" aria-describedby="search" v-model="domain">
+        <div class="input-group has-validation mb-3">
+          <input type="text" class="form-control" :class="{ 'is-invalid': hasError }" placeholder="Enter domain name"
+            aria-label="Domain Name" aria-describedby="search" v-model="domain">
           <button class="btn btn-outline-secondary" type="button" id="search" @click="submit">Search</button>
+          <div class="invalid-feedback">
+            Please enter a domain name.
+          </div>
         </div>
         <SearchResults :domain="domain" />
         <br>
